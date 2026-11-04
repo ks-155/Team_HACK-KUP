@@ -9,6 +9,7 @@ A lightweight Flask archive for searching, organizing, and exploring heritage an
 - Live era and document-type filters
 - Leaflet map markers with report navigation
 - Archive chat answers with clickable citations
+
 - In-memory report uploads with keyword-based era and type detection
 - APA citation copying for every report
 - Responsive light and dark themes
