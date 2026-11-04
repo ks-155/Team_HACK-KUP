@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Searchable archive of heritage and travel reports from Gujarat and India.">
+  <title>Heritage &amp; Travel Report Archive</title>
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <span class="eyebrow">A living field archive</span>
+      <h1>Heritage &amp; Travel</h1>
+      <p>Reports, routes, and remembered places across time.</p>
+    </div>
+    <div class="header-mark" aria-hidden="true">✦</div>
+  </header>
+
+  <main class="app-shell">
+    <section class="left-column" aria-label="Archive search and map">
+      <div class="panel search-panel">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Explore the collection</span>
+            <h2>Find a report</h2>
+          </div>
+          <span id="result-count" class="result-count" aria-live="polite"></span>
+        </div>
+        <label class="sr-only" for="search-input">Search reports</label>
+        <input id="search-input" type="search" placeholder="Search places, materials, stories..." autocomplete="off">
+        <div class="filter-row">
+          <label>
+            <span>Era</span>
+            <select id="era-filter">
+              <option value="">All eras</option>
+              <option>Ancient</option>
+              <option>Medieval</option>
+              <option>Colonial</option>
+              <option>Modern</option>
+            </select>
+          </label>
+          <label>
+            <span>Type</span>
+            <select id="type-filter">
+              <option value="">All types</option>
+              <option>Temple</option>
+              <option>Fort</option>
+              <option>Stepwell</option>
+              <option>Mosque</option>
+              <option>Archaeological site</option>
+              <option>Travelogue</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div id="map" class="map" aria-label="Map of archive places"></div>
+      <div id="results" class="results" aria-live="polite"></div>
+    </section>
+
+    <aside class="right-column" aria-label="Archive tools">
+      <section class="panel chat-panel">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Ask the archive</span>
+            <h2>Make a connection</h2>
+          </div>
+          <span class="chat-symbol" aria-hidden="true">↗</span>
+        </div>
+        <p class="helper-text">Ask about a place, period, craft, or journey. Answers link back to their sources.</p>
+        <form id="chat-form">
+          <label class="sr-only" for="chat-input">Question for the archive</label>
+          <textarea id="chat-input" rows="3" placeholder="Which sites reveal historic water management?" required></textarea>
+          <button class="button button-dark" type="submit">Ask the archive <span aria-hidden="true">→</span></button>
+        </form>
+        <div id="chat-status" class="status" role="status"></div>
+        <div id="chat-answer" class="chat-answer" hidden></div>
+      </section>
+
+      <section class="panel upload-panel">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Add your voice</span>
+            <h2>Upload a report</h2>
+          </div>
+          <span class="upload-symbol" aria-hidden="true">＋</span>
+        </div>
+        <p class="helper-text">Share a short field note. The archive will place and classify it for you.</p>
+        <form id="upload-form">
+          <label for="upload-title">Title</label>
+          <input id="upload-title" type="text" placeholder="A morning at..." required>
+          <label for="upload-place">Place</label>
+          <select id="upload-place" required>
+            <option value="">Choose a place</option>
+          </select>
+          <label for="upload-text">Report text</label>
+          <textarea id="upload-text" rows="5" placeholder="Describe what you noticed..." required></textarea>
+          <button class="button button-accent" type="submit">Add to archive <span aria-hidden="true">↗</span></button>
+        </form>
+        <div id="upload-status" class="status" role="status"></div>
+      </section>
+    </aside>
+  </main>
+
+  <footer class="site-footer">
+    <span>Heritage &amp; Travel Report Archive</span>
+    <span>Built for curious travellers and careful readers.</span>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/index.js"></script>
+</body>
+</html>
