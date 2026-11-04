@@ -13,96 +13,126 @@
   <header class="site-header">
     <div class="brand">
       <span class="eyebrow">A living field archive</span>
-      <h1>Heritage &amp; Travel</h1>
+      <h1>Heritage &amp; Travel Report Archive</h1>
       <p>Reports, routes, and remembered places across time.</p>
+      <div class="header-actions">
+        <a class="button button-dark" href="#chat-panel">Ask the archive <span aria-hidden="true">→</span></a>
+        <a class="button button-accent" href="#upload-panel">Add a report <span aria-hidden="true">↗</span></a>
+      </div>
     </div>
-    <div class="header-mark" aria-hidden="true">✦</div>
+    <div class="header-side">
+      <div class="header-mark" aria-hidden="true">✦</div>
+      <div class="stats" aria-label="Archive statistics">
+        <div><strong id="stat-reports">8</strong><span>Reports</span></div>
+        <div><strong id="stat-places">8</strong><span>Places</span></div>
+        <div><strong id="stat-eras">3</strong><span>Eras</span></div>
+      </div>
+    </div>
   </header>
 
-  <main class="app-shell">
-    <section class="left-column" aria-label="Archive search and map">
-      <div class="panel search-panel">
-        <div class="section-heading">
-          <div>
-            <span class="eyebrow">Explore the collection</span>
-            <h2>Find a report</h2>
-          </div>
-          <span id="result-count" class="result-count" aria-live="polite"></span>
-        </div>
+  <nav class="archive-toolbar" aria-label="Archive filters">
+    <div class="toolbar-inner">
+      <div class="search-control">
         <label class="sr-only" for="search-input">Search reports</label>
         <input id="search-input" type="search" placeholder="Search places, materials, stories..." autocomplete="off">
-        <div class="filter-row">
-          <label>
-            <span>Era</span>
-            <select id="era-filter">
-              <option value="">All eras</option>
-              <option>Ancient</option>
-              <option>Medieval</option>
-              <option>Colonial</option>
-              <option>Modern</option>
-            </select>
-          </label>
-          <label>
-            <span>Type</span>
-            <select id="type-filter">
-              <option value="">All types</option>
-              <option>Temple</option>
-              <option>Fort</option>
-              <option>Stepwell</option>
-              <option>Mosque</option>
-              <option>Archaeological site</option>
-              <option>Travelogue</option>
-            </select>
-          </label>
+        <button id="clear-search" class="clear-search" type="button" aria-label="Clear search" hidden>×</button>
+      </div>
+      <label>
+        <span class="sr-only">Era</span>
+        <select id="era-filter">
+          <option value="">All eras</option>
+          <option value="Ancient">Ancient</option>
+          <option value="Medieval">Medieval</option>
+          <option value="Colonial">Colonial</option>
+          <option value="Modern">Modern</option>
+        </select>
+      </label>
+      <label>
+        <span class="sr-only">Type</span>
+        <select id="type-filter">
+          <option value="">All types</option>
+          <option value="Temple">Temple</option>
+          <option value="Fort">Fort</option>
+          <option value="Stepwell">Stepwell</option>
+          <option value="Mosque">Mosque</option>
+          <option value="Archaeological site">Archaeological site</option>
+          <option value="Travelogue">Travelogue</option>
+        </select>
+      </label>
+      <label>
+        <span class="sr-only">Sort results</span>
+        <select id="sort-filter">
+          <option value="relevance">Relevance</option>
+          <option value="title">Title</option>
+          <option value="era">Era</option>
+        </select>
+      </label>
+      <button id="clear-filters" class="toolbar-button" type="button">Clear filters</button>
+      <span id="result-count" class="result-count" aria-live="polite">8 reports</span>
+    </div>
+    <div id="active-filters" class="active-filters" aria-live="polite"></div>
+  </nav>
+
+  <main class="app-shell">
+    <section class="archive-content" aria-label="Archive reports">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">Explore the collection</span>
+          <h2>Archive reports</h2>
         </div>
       </div>
-
-      <div id="map" class="map" aria-label="Map of archive places"></div>
       <div id="results" class="results" aria-live="polite"></div>
     </section>
-
-    <aside class="right-column" aria-label="Archive tools">
-      <section class="panel chat-panel">
-        <div class="section-heading">
-          <div>
-            <span class="eyebrow">Ask the archive</span>
-            <h2>Make a connection</h2>
-          </div>
-          <span class="chat-symbol" aria-hidden="true">↗</span>
+    <section class="map-panel" aria-label="Archive map">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">Place index</span>
+          <h2>Reports on the map</h2>
         </div>
-        <p class="helper-text">Ask about a place, period, craft, or journey. Answers link back to their sources.</p>
-        <form id="chat-form">
-          <label class="sr-only" for="chat-input">Question for the archive</label>
-          <textarea id="chat-input" rows="3" placeholder="Which sites reveal historic water management?" required></textarea>
-          <button class="button button-dark" type="submit">Ask the archive <span aria-hidden="true">→</span></button>
-        </form>
-        <div id="chat-status" class="status" role="status"></div>
-        <div id="chat-answer" class="chat-answer" hidden></div>
-      </section>
+      </div>
+      <div id="map" class="map" aria-label="Map of archive places"></div>
+    </section>
 
-      <section class="panel upload-panel">
-        <div class="section-heading">
-          <div>
-            <span class="eyebrow">Add your voice</span>
-            <h2>Upload a report</h2>
-          </div>
-          <span class="upload-symbol" aria-hidden="true">＋</span>
+    <section id="chat-panel" class="panel chat-panel">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">Ask the archive</span>
+          <h2>Make a connection</h2>
         </div>
-        <p class="helper-text">Share a short field note. The archive will place and classify it for you.</p>
-        <form id="upload-form">
-          <label for="upload-title">Title</label>
-          <input id="upload-title" type="text" placeholder="A morning at..." required>
-          <label for="upload-place">Place</label>
-          <select id="upload-place" required>
-            <option value="">Choose a place</option>
-          </select>
-          <label for="upload-text">Report text</label>
-          <textarea id="upload-text" rows="5" placeholder="Describe what you noticed..." required></textarea>
-          <button class="button button-accent" type="submit">Add to archive <span aria-hidden="true">↗</span></button>
-        </form>
-        <div id="upload-status" class="status" role="status"></div>
-      </section>
-    </aside>
+        <span class="chat-symbol" aria-hidden="true">↗</span>
+      </div>
+      <p class="helper-text">Ask about a place, period, craft, or journey. Answers link back to their sources.</p>
+      <form id="chat-form">
+        <label class="sr-only" for="chat-input">Question for the archive</label>
+        <textarea id="chat-input" rows="3" placeholder="Which sites reveal historic water management?" required></textarea>
+        <button class="button button-dark" type="submit">Ask the archive <span aria-hidden="true">→</span></button>
+      </form>
+      <div id="chat-status" class="status" role="status"></div>
+      <div id="chat-answer" class="chat-answer" hidden></div>
+    </section>
+
+    <section id="upload-panel" class="panel upload-panel">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">Add your voice</span>
+          <h2>Add a report</h2>
+        </div>
+        <span class="upload-symbol" aria-hidden="true">＋</span>
+      </div>
+      <p class="helper-text">Share a short field note. The archive will place and classify it for you.</p>
+      <form id="upload-form">
+        <label for="upload-title">Title</label>
+        <input id="upload-title" type="text" placeholder="A morning at..." required>
+        <label for="upload-place">Place</label>
+        <select id="upload-place" required>
+          <option value="">Choose a place</option>
+        </select>
+        <label for="upload-text">Report text</label>
+        <textarea id="upload-text" rows="5" placeholder="Describe what you noticed..." required></textarea>
+        <button class="button button-accent" type="submit">Add to archive <span aria-hidden="true">↗</span></button>
+      </form>
+      <div id="upload-status" class="status" role="status"></div>
+    </section>
   </main>
 
   <footer class="site-footer">
