@@ -16,8 +16,8 @@
       <h1>Heritage &amp; Travel Report Archive</h1>
       <p>Reports, routes, and remembered places across time.</p>
       <div class="header-actions">
-        <a class="button button-dark" href="#chat-panel">Ask the archive <span aria-hidden="true">→</span></a>
-        <a class="button button-accent" href="#upload-panel">Add a report <span aria-hidden="true">↗</span></a>
+        <button id="open-chat" class="button button-dark" type="button">Ask the archive <span aria-hidden="true">→</span></button>
+        <button id="open-upload" class="button button-accent" type="button">Add a report <span aria-hidden="true">↗</span></button>
       </div>
     </div>
     <div class="header-side">
@@ -93,11 +93,11 @@
       <div id="map" class="map" aria-label="Map of archive places"></div>
     </section>
 
-    <section id="chat-panel" class="panel chat-panel">
+    <section id="chat-panel" class="panel chat-panel drawer-panel" aria-labelledby="chat-heading">
       <div class="section-heading">
         <div>
           <span class="eyebrow">Ask the archive</span>
-          <h2>Make a connection</h2>
+          <h2 id="chat-heading">Make a connection</h2>
         </div>
         <span class="chat-symbol" aria-hidden="true">↗</span>
       </div>
@@ -111,11 +111,11 @@
       <div id="chat-answer" class="chat-answer" hidden></div>
     </section>
 
-    <section id="upload-panel" class="panel upload-panel">
+    <section id="upload-panel" class="panel upload-panel drawer-panel" aria-labelledby="upload-heading">
       <div class="section-heading">
         <div>
           <span class="eyebrow">Add your voice</span>
-          <h2>Add a report</h2>
+          <h2 id="upload-heading">Add a report</h2>
         </div>
         <span class="upload-symbol" aria-hidden="true">＋</span>
       </div>
