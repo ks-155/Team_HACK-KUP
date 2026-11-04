@@ -1,6 +1,8 @@
-const map = L.map("map", { scrollWheelZoom: false }).setView([23.5, 72.5], 7);
+const map = typeof L === "undefined"
+  ? null
+  : L.map("map", { scrollWheelZoom: false }).setView([23.5, 72.5], 7);
 const markers = new Map();
-const markerLayer = L.layerGroup().addTo(map);
+const markerLayer = map ? L.layerGroup().addTo(map) : null;
 const state = {
   q: "",
   era: "",
@@ -8,16 +10,21 @@ const state = {
   sort: "relevance",
   results: [],
   allDocuments: [],
-  loading: false
+  loading: false,
+  visibleLimit: 8
 };
 let searchTimer;
 let activeDrawer = null;
 let drawerTrigger = null;
 
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution: "&copy; OpenStreetMap contributors",
-  maxZoom: 18
-}).addTo(map);
+if (map) {
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "&copy; OpenStreetMap contributors",
+    maxZoom: 18
+  }).addTo(map);
+} else {
+  document.getElementById("map").textContent = "Map unavailable. Report results remain available.";
+}
 
 // Fetch JSON from an archive endpoint and raise useful errors.
 async function fetchJSON(url, options) {
@@ -95,6 +102,7 @@ function restoreURL() {
 
 // Add current result markers, offsetting duplicate locations and fitting the map.
 function renderMap(results) {
+  if (!map || !markerLayer) return;
   markerLayer.clearLayers();
   markers.clear();
   const bounds = [];
@@ -145,6 +153,7 @@ function prefersReducedMotion() {
 
 // Focus a current result on the map and open its popup.
 function focusDocument(id) {
+  if (!map) return;
   const document = state.results.find((item) => item.id === id) || state.allDocuments.find((item) => item.id === id);
   const marker = markers.get(id);
   if (!document || !marker) return;
@@ -239,7 +248,8 @@ function renderCards(results) {
     renderEmptyState();
     return;
   }
-  container.innerHTML = results.map((item) => `
+  const visibleResults = results.slice(0, state.visibleLimit);
+  container.innerHTML = visibleResults.map((item) => `
     <article class="result-card" data-id="${escapeHTML(item.id)}">
       <div class="card-topline"><span class="tag">${escapeHTML(item.era)}</span><span>${escapeHTML(item.year)}</span></div>
       <h3>${escapeHTML(item.title)}</h3>
@@ -253,6 +263,17 @@ function renderCards(results) {
       </div>
     </article>
   `).join("");
+  if (results.length > state.visibleLimit) {
+    container.insertAdjacentHTML("beforeend", `
+      <div class="show-more-wrap">
+        <button class="button button-dark show-more" type="button">Show more</button>
+      </div>
+    `);
+    container.querySelector(".show-more").addEventListener("click", () => {
+      state.visibleLimit += 8;
+      renderCards(state.results);
+    });
+  }
   container.querySelectorAll(".result-card").forEach((card) => {
     card.addEventListener("mouseenter", () => highlightMarker(card.dataset.id, true));
     card.addEventListener("mouseleave", () => highlightMarker(card.dataset.id, false));
@@ -278,6 +299,7 @@ function sortResults(results) {
 // Load and render current results from the search endpoint.
 async function loadResults() {
   state.loading = true;
+  state.visibleLimit = 8;
   renderSkeletons();
   syncURL();
   renderActiveFilters();
@@ -309,6 +331,7 @@ function clearFilters() {
   state.era = "";
   state.type = "";
   state.sort = "relevance";
+  state.visibleLimit = 8;
   syncControls();
   fetchResults();
 }
@@ -326,6 +349,19 @@ async function copyCitation(button) {
     showToast("APA citation copied");
   } catch (error) {
     showToast("Could not copy the citation");
+  }
+}
+
+// Copy a stable report URL to the clipboard.
+async function copyReportLink(button) {
+  const url = new URL(window.location.href);
+  url.searchParams.set("q", button.dataset.title);
+  url.hash = `report-${button.dataset.id}`;
+  try {
+    await navigator.clipboard.writeText(url.toString());
+    showToast("Report link copied");
+  } catch (error) {
+    showToast("Could not copy the report link");
   }
 }
 
@@ -369,13 +405,17 @@ function prepareDrawer(element, label) {
   element.setAttribute("role", "dialog");
   element.setAttribute("aria-modal", "true");
   element.setAttribute("aria-label", label);
-  if (!element.querySelector(".drawer-close")) {
-    const closeButton = document.createElement("button");
+  let closeButton = element.querySelector(".drawer-close");
+  if (!closeButton) {
+    closeButton = document.createElement("button");
     closeButton.className = "text-button drawer-close";
     closeButton.type = "button";
     closeButton.textContent = "Close ×";
     element.prepend(closeButton);
+  }
+  if (!closeButton.dataset.closeBound) {
     closeButton.addEventListener("click", closeDrawer);
+    closeButton.dataset.closeBound = "true";
   }
 }
 
@@ -384,9 +424,10 @@ async function showDetails(id, triggerBtn) {
   const record = state.allDocuments.find((item) => item.id === id) || state.results.find((item) => item.id === id);
   if (!record) return;
   const drawer = getDetailsDrawer();
-  drawer.panel.innerHTML = `<span class="eyebrow">Report details</span><h2>${escapeHTML(record.title)}</h2><p class="drawer-meta">${escapeHTML(record.place)} · ${escapeHTML(record.era)} · ${escapeHTML(record.type)} · ${escapeHTML(record.year)}</p><p>${escapeHTML(record.text)}</p><div class="tag-list">${(record.tags || []).map((tag) => `<span class="tag-chip">${escapeHTML(tag)}</span>`).join("") || "<span class=\"no-source\">No tags</span>"}</div><h3>Sources</h3><div class="source-list">${renderSources(record.sources)}</div><button class="button button-dark drawer-cite" type="button" data-id="${escapeHTML(record.id)}">Copy APA citation</button><h3>Related reports</h3><div id="related-reports">Loading related reports...</div>`;
+  drawer.panel.innerHTML = `<span class="eyebrow">Report details</span><h2>${escapeHTML(record.title)}</h2><p class="drawer-meta">${escapeHTML(record.place)} · ${escapeHTML(record.era)} · ${escapeHTML(record.type)} · ${escapeHTML(record.year)}</p><p>${escapeHTML(record.text)}</p><div class="tag-list">${(record.tags || []).map((tag) => `<span class="tag-chip">${escapeHTML(tag)}</span>`).join("") || "<span class=\"no-source\">No tags</span>"}</div><h3>Sources</h3><div class="source-list">${renderSources(record.sources)}</div><div class="drawer-actions"><button class="button button-dark drawer-cite" type="button" data-id="${escapeHTML(record.id)}">Copy APA citation</button><button class="button button-dark drawer-link" type="button" data-id="${escapeHTML(record.id)}" data-title="${escapeHTML(record.title)}">Copy link</button></div><h3>Related reports</h3><div id="related-reports">Loading related reports...</div>`;
   openDrawer(drawer.element, triggerBtn);
   drawer.panel.querySelector(".drawer-cite").addEventListener("click", (event) => copyCitation(event.currentTarget));
+  drawer.panel.querySelector(".drawer-link").addEventListener("click", (event) => copyReportLink(event.currentTarget));
   try {
     const related = await fetchJSON(`/api/related/${id}`);
     document.getElementById("related-reports").innerHTML = related.length
@@ -410,7 +451,6 @@ function getDetailsDrawer() {
   drawer = document.createElement("aside");
   drawer.className = "drawer details-drawer";
   drawer.id = "details-drawer";
-  drawer.innerHTML = `<button class="text-button drawer-close" type="button">Close ×</button>`;
   const panel = document.createElement("div");
   panel.className = "drawer-content";
   drawer.appendChild(panel);

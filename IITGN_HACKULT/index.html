@@ -37,7 +37,7 @@
         <input id="search-input" type="search" placeholder="Search places, materials, stories..." autocomplete="off">
         <button id="clear-search" class="clear-search" type="button" aria-label="Clear search" hidden>×</button>
       </div>
-      <label>
+      <label for="era-filter">
         <span class="sr-only">Era</span>
         <select id="era-filter">
           <option value="">All eras</option>
@@ -47,7 +47,7 @@
           <option value="Modern">Modern</option>
         </select>
       </label>
-      <label>
+      <label for="type-filter">
         <span class="sr-only">Type</span>
         <select id="type-filter">
           <option value="">All types</option>
@@ -59,7 +59,7 @@
           <option value="Travelogue">Travelogue</option>
         </select>
       </label>
-      <label>
+      <label for="sort-filter">
         <span class="sr-only">Sort results</span>
         <select id="sort-filter">
           <option value="relevance">Relevance</option>
@@ -108,7 +108,7 @@
         <button class="button button-dark" type="submit">Ask the archive <span aria-hidden="true">→</span></button>
       </form>
       <div id="chat-status" class="status" role="status"></div>
-      <div id="chat-answer" class="chat-answer" hidden></div>
+      <div id="chat-answer" class="chat-answer" role="status" aria-live="polite" hidden></div>
     </section>
 
     <section id="upload-panel" class="panel upload-panel drawer-panel" aria-labelledby="upload-heading">
