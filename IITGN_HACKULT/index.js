@@ -16,6 +16,7 @@ const state = {
 let searchTimer;
 let activeDrawer = null;
 let drawerTrigger = null;
+let searchRequestId = 0;
 
 if (map) {
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -28,10 +29,41 @@ if (map) {
 
 // Fetch JSON from an archive endpoint and raise useful errors.
 async function fetchJSON(url, options) {
-  const response = await fetch(url, options);
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error || "The archive could not complete that request.");
-  return data;
+  const method = options && options.method ? options.method.toUpperCase() : "GET";
+  const retryDelays = method === "GET" ? [1000, 2000, 4000, 8000, 15000] : [];
+
+  for (let attempt = 0; attempt <= retryDelays.length; attempt += 1) {
+    let response;
+    try {
+      response = await fetch(url, options);
+    } catch (error) {
+      if (attempt === retryDelays.length) {
+        if (method !== "GET") throw error;
+        throw new Error("The archive server is still waking up or unavailable. Please try again in a moment.");
+      }
+      await new Promise((resolve) => window.setTimeout(resolve, retryDelays[attempt]));
+      continue;
+    }
+
+    const contentType = response.headers.get("content-type") || "";
+    const isJSON = contentType.includes("application/json") || contentType.includes("+json");
+
+    if (response.ok && isJSON) return response.json();
+
+    if (response.status >= 500 || (response.ok && !isJSON)) {
+      if (attempt === retryDelays.length) {
+        throw new Error("The archive server is still waking up or unavailable. Please try again in a moment.");
+      }
+      await new Promise((resolve) => window.setTimeout(resolve, retryDelays[attempt]));
+      continue;
+    }
+
+    if (isJSON) {
+      const data = await response.json();
+      throw new Error(data.error || "The archive could not complete that request.");
+    }
+    throw new Error("The archive returned an unexpected response. Please try again.");
+  }
 }
 
 // Escape archive text before placing it into an HTML string.
@@ -298,6 +330,7 @@ function sortResults(results) {
 
 // Load and render current results from the search endpoint.
 async function loadResults() {
+  const requestId = ++searchRequestId;
   state.loading = true;
   state.visibleLimit = 8;
   renderSkeletons();
@@ -306,16 +339,18 @@ async function loadResults() {
   const params = new URLSearchParams({ q: state.q, era: state.era, type: state.type });
   try {
     const results = await fetchJSON(`/api/search?${params}`);
+    if (requestId !== searchRequestId) return;
     state.results = sortResults(results);
     renderCards(state.results);
     renderMap(state.results);
     document.getElementById("result-count").textContent = `${state.results.length} report${state.results.length === 1 ? "" : "s"}`;
   } catch (error) {
+    if (requestId !== searchRequestId) return;
     state.results = [];
     renderMap([]);
     renderErrorState(error);
   } finally {
-    state.loading = false;
+    if (requestId === searchRequestId) state.loading = false;
   }
 }
 
